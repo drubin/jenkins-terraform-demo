@@ -19,7 +19,7 @@ ansiColor('xterm') {
     }
 
     stage('show'){
-      sh "terraform show plan.plan"
+      sh "terraform show   plan.plan"
       // Save plan output for future so they can be compared
       archiveArtifacts 'plan.plan'
       // store the plan file to be used later on potentially different node
@@ -56,7 +56,9 @@ ansiColor('xterm') {
     unstash name: 'plans'
 
     stage('apply'){
-      sh 'terraform apply plan.plan'
+      withCredentials([usernamePassword(credentialsId: 'aws-keys', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
+        sh 'terraform apply plan.plan'
+      }
     }
   }
 }
