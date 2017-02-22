@@ -14,7 +14,10 @@ ansiColor('xterm') {
       // Assumes you have setup a credential with ID aws-keys that contains your AWS acces tokens 
       // We automatically inject them as the standard AWS variables so terraform can read them
       withCredentials([usernamePassword(credentialsId: 'aws-keys', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
-        sh 'terraform plan -out plan.plan'
+        sh """
+          terraform remote config -backend=S3 -backend-config="bucket=david-jenkins-state" -backend-config="key=state.tfstate" -backend-config="region=eu-west-1"
+          terraform plan -out plan.plan
+        """
       }
     }
 
@@ -57,7 +60,10 @@ ansiColor('xterm') {
 
     stage('apply'){
       withCredentials([usernamePassword(credentialsId: 'aws-keys', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
-        sh 'terraform apply plan.plan'
+        sh """
+          terraform remote config -backend=S3 -backend-config="bucket=david-jenkins-state" -backend-config="key=state.tfstate" -backend-config="region=eu-west-1" 
+          terraform apply plan.plan
+        """
       }
     }
   }
