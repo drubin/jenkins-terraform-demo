@@ -5,6 +5,8 @@ ansiColor('xterm') {
     // Set github status that the images could be built successfully
     step([$class: 'GitHubSetCommitStatusBuilder'])
     checkout scm
+    // we don't release or ask for user input on pull requests
+    pullRequest = env.BRANCH_NAME != 'master'
     stage('install'){
       downloadTerraform()
       env.PATH = "${env.PATH}:${env.WORKSPACE}"
@@ -27,9 +29,6 @@ ansiColor('xterm') {
       archiveArtifacts 'plan.plan'
       // store the plan file to be used later on potentially different node
       stash includes: 'plan.plan', name: 'plans'
-
-      // we don't release or ask for user input on pull requests
-      pullRequest = env.BRANCH_NAME != 'master'
     }
   }
 }
